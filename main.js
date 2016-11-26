@@ -1,4 +1,5 @@
-const {app, BrowserWindow, Menu} = require('electron')
+const electron = require('electron')
+const {app, BrowserWindow, Menu} = electron
 const path = require('path')
 const url = require('url')
 
@@ -66,7 +67,15 @@ function openAboutWindow() {
 }
 
 // Create the window then the app is ready
-app.on('ready', createWindow)
+app.on('ready', () => {
+  createWindow()
+  electron.powerMonitor.on('on-ac', () => {
+    mainWindow.restore()
+  })
+  electron.powerMonitor.on('on-battery', () => {
+    mainWindow.minimize()
+  })
+})
 
 // Quit when all windows are closed
 app.on('window-all-closed', () => {
