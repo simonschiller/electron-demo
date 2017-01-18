@@ -1,4 +1,5 @@
 const database = require('./js/database');
+const {ipcRenderer} = require('electron');
 
 window.onload = function() {
 
@@ -36,6 +37,7 @@ function populateTable() {
       tableBody += '<tr>';
       tableBody += '  <td>' + persons[i].firstname + '</td>';
       tableBody += '  <td>' + persons[i].lastname + '</td>';
+      tableBody += '  <td><input type="button" value="Edit" onclick="editPerson(\'' + persons[i]._id + '\')")></td>'
       tableBody += '  <td><input type="button" value="Delete" onclick="deletePerson(\'' + persons[i]._id + '\')"></td>'
       tableBody += '</tr>';
     }
@@ -54,3 +56,15 @@ function deletePerson(id) {
   // Repopulate the table
   populateTable();
 }
+
+// Opens the window to edit a person
+function editPerson(id) {
+
+  // Open the edit window
+  ipcRenderer.send('open-edit-window', id);
+}
+
+// Update the table if this is called
+ipcRenderer.on('update-table', function() {
+  location.reload();
+})

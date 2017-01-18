@@ -1,5 +1,5 @@
 const electron = require('electron')
-const {app, BrowserWindow, Menu} = electron
+const {app, BrowserWindow, Menu, ipcMain} = electron
 const path = require('path')
 const url = require('url')
 
@@ -20,6 +20,7 @@ menuTemplate = [
 
 // Keep a global reference so the garbage collector does not destroy our app
 let mainWindow
+let editWindow
 
 function createWindow () {
 
@@ -66,9 +67,48 @@ function openAboutWindow() {
   })
 }
 
+// Opens the edit window
+function openEditWindow(id) {
+
+  editWindow = new BrowserWindow({
+    parent: mainWindow,
+    modal: true,
+    show: false,
+    width: 600,
+    height: 300
+  })
+  editWindow.loadURL(url.format({
+    pathname: path.join(__dirname, 'edit.html'),
+    protocol: 'file:',
+    slashes: true
+  }))
+  editWindow.setMenu(null)
+  editWindow.once('ready-to-show', () => {
+    editWindow.show()
+    editWindow.webContents.send('id', id)
+  })
+}
+
+// Add a callback event for the update complete event
+ipcMain.on('update-complete', (event, arg) => {
+
+  // Close the window
+  editWindow.close()
+
+  // Send the update event to the main window
+  mainWindow.webContents.send('update-table', '')
+})
+
+// Add a callback event for the open edit window event
+ipcMain.on('open-edit-window', (event, arg) => {
+  openEditWindow(arg);
+})
+
 // Create the window then the app is ready
 app.on('ready', () => {
   createWindow()
+
+  // Minimizes the app when the power is plugged out
   electron.powerMonitor.on('on-ac', () => {
     mainWindow.restore()
   })

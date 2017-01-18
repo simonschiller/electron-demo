@@ -17,6 +17,25 @@ exports.addPerson = function(firstname, lastname) {
   });
 };
 
+exports.updatePerson = function (id, fname, lname, fnc) {
+
+  db.update({ _id: id}, { $set: { firstname: fname, lastname: lname } }, {}, function(err, numReplaced) {
+
+    // Execute the parameter function
+    fnc();
+  });
+}
+
+exports.getPersonById = function(id, fnc) {
+
+  // Find the person from the database
+  db.findOne({ _id: id }, function (err, doc) {
+
+    // Execute the parameter function
+    fnc(doc);
+  });
+};
+
 // Returns all persons
 exports.getPersons = function(fnc) {
 
